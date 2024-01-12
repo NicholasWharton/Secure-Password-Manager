@@ -2,6 +2,7 @@ import socket
 import os
 import hashlib
 import tkinter
+import sys
 from Crypto.Cipher import AES
 from Crypto.Util import Padding
 from pmclientbuttons import button1Set
@@ -16,7 +17,14 @@ from pmclientservices import displayService
 
 
 server_ip = '10.0.2.6'  # Replace with the actual server IP address
-server_port = 12356  # Use the same port number as the server
+server_port = 12356  # Default Port (Use the same port number as the server)
+
+
+if (len(sys.argv) == 2): #if port number is input as first argument
+    server_port = int(sys.argv[1])
+elif (len(sys.argv) == 3): #if server address and port number are input as second argument and first argument respectivly
+        port = int(sys.argv[1])
+        host = int(sys.argv[2])
 
 
 def yesButton(buttonVar, val, username, window):
@@ -297,4 +305,11 @@ def menu(username):
     window.wait_variable(buttonVar)
 
 
-loginOrCreate()
+
+
+
+def main():
+    loginOrCreate()
+
+if __name__ == "__main__":
+    main()
