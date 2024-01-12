@@ -1,3 +1,5 @@
+#Secure Password Manager
+
 pmclient.py: the main driver program for the client. Runs the GUI and handles the interaction between the user and the server.
   
   pmclientservices.py: holds functions that allow the adding of services to a user account and displaying this information.
