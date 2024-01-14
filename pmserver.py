@@ -1,3 +1,8 @@
+# Nicholas Wharton
+# Secure Password Manager
+# Main Server Driver Function
+# 1/13/2024
+
 import socket
 import csv
 import os
@@ -17,7 +22,10 @@ def HandleClient (conn, addr):
 
         responsearr = data.split()
 
-        if responsearr[0] == "L": #user attempts to login
+        if responsearr[0] == "Discover": #used for client to discover server
+            conn.sendall("Alive".encode('utf-8'))
+
+        elif responsearr[0] == "L": #user attempts to login
             username = responsearr[1]
             passhash = responsearr[2]
             found = False
@@ -147,4 +155,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

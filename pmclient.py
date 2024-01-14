@@ -1,3 +1,8 @@
+# Nicholas Wharton
+# Secure Password Manager
+# Main Client Driver Program
+# 1/13/2024
+
 import socket
 import os
 import hashlib
@@ -16,15 +21,18 @@ from pmclientservices import addService
 from pmclientservices import displayService
 
 
+# !!if server_port is equal to 0 the program will sense
+# flood ports 1024-60000 on server to discover which port
+# the server program is listening on!!
 server_ip = '10.0.2.6'  # Replace with the actual server IP address
-server_port = 12356  # Default Port (Use the same port number as the server)
+server_port = 0  # Default Port (Use the same port number as the server)
 
 
 if (len(sys.argv) == 2): #if port number is input as first argument
     server_port = int(sys.argv[1])
 elif (len(sys.argv) == 3): #if server address and port number are input as second argument and first argument respectivly
-        port = int(sys.argv[1])
-        host = int(sys.argv[2])
+    server_port = int(sys.argv[1])
+    server_ip = int(sys.argv[2])
 
 
 def yesButton(buttonVar, val, username, window):
@@ -32,6 +40,31 @@ def yesButton(buttonVar, val, username, window):
     window.destroy()
     menu(username)
 
+# !!if server_port is equal to 0 the program will sense
+# flood ports 1024-60000 on server to discover which port
+# the server program is listening on!!
+def floodServer():
+    global server_port
+    for i in range(1024, 60000):
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.connect((server_ip, i))
+            message = "Discover"
+            client_socket.sendall(message.encode('utf-8'))
+
+            data = client_socket.recv(1024).decode('utf-8')
+            while not data:
+                data = client_socket.recv(1024).decode('utf-8')
+            print(f"Received response: {data}")
+
+            client_socket.close()
+            print("Servers listening on port " + str(i))
+            server_port = i
+            break
+        except:
+            continue
+
+#starting menu asking user to choose either logging into a preexisting account or creating a new one.
 def loginOrCreate():
     window = tkinter.Tk()
     window.title("Password Manager")
@@ -306,9 +339,11 @@ def menu(username):
 
 
 
-
-
 def main():
+    #if server_port is not explicitly set in the code, or not input as an argument flood the servers ports to find the port its listening on.
+    if server_port == 0:
+        floodServer()
+    print(server_port)
     loginOrCreate()
 
 if __name__ == "__main__":

@@ -1,3 +1,8 @@
+# Nicholas Wharton
+# Secure Password Manager
+# Client GUI Buttons Trigger Functions
+# 1/13/2024
+
 def button1Set(buttonVar, twoVar, window):
     buttonVar.set(True)
     twoVar.set(True)
@@ -26,10 +31,6 @@ def sub(val, buttonVar, window):
 
 def processInfo5(buttonVar, window):
     buttonVar.set(True)
-
-def yesButton(buttonVar, val, username, window):
-    buttonVar.set(val)
-    window.destroy()
 
 def noButton(buttonVar, val, window, exitVar):
     buttonVar.set(val)

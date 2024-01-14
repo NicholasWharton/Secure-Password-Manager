@@ -1,3 +1,8 @@
+# Nicholas Wharton
+# Secure Password Manager
+# Client Services Functions
+# 1/13/2024
+
 import socket
 import tkinter
 import hashlib
