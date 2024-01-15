@@ -8,6 +8,9 @@ pmserver.py: is the server-side program that listens for and handles client requ
 client or sending it. Then storing the information on the server side so it's inaccessible unless the adversary gets to the central
 system.
 
+
+
+
 (FOR THE 1/13/23 ARCHIVE PROGRAM FILES)
 
 pmclient.py: the main driver program for the client. Runs the GUI and handles the interaction between the user and the server.
@@ -20,6 +23,10 @@ pmserver.py: is the server-side program that listens for and handles client requ
 client or sending it. Then storing the information on the server side so it's inaccessible unless the adversary gets to the central
 system.
 
+
+
+
+(SECURITY)
 
 The password manager's security relies on the user keeping a 16-byte key confidential.
 A username and password are required to login to a password manager user account. You cannot
