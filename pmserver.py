@@ -135,7 +135,7 @@ def main():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #host = socket.gethostname() # Bind to all available interfaces
     host = '0.0.0.0' # Bind to all available interfaces
-    port = 12356  # Choose a port number
+    port = 5001  # Choose a port number
 
     if (len(sys.argv) == 2):
         port = int(sys.argv[1])
