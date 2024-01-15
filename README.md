@@ -36,11 +36,19 @@ Future Changes to Make:
 
 1. Ask for confirmation password when creating an account or service (also maybe confirm key when input for creating service)
 
-2. Add display service capabilities to pmclientGUI2.py
+2. need to add floodserver() to pmclientGUI2.py
 
-3. Add page which asks user to either continue with the app or exit to pmclientGUI2.py
 
-4. need to add floodserver() to pmclientGUI2.py
+Changes made on 1/15/24:
+
+1. Added page that prompt user if they want to continue to menu or quitting after adding a new service.
+
+2. Fixed the updating of pages so they are cleared before they update. While also making it so the page is updated when its switch too rather than just on initialization.
+
+3. Added the displayService() function to pmclientGUI2.py which is now fixed to only compares the generated key hash with the record associated with the choosen service in the menu.
+
+
+
 
 Changes made on 1/14/24:
 

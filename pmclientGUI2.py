@@ -1,7 +1,7 @@
 # Nicholas Wharton
 # Secure Password Manager
 # Main Client Driver Program
-# 1/14/2024
+# 1/15/2024
 
 import tkinter as tk
 import socket
@@ -14,8 +14,10 @@ from Crypto.Util import Padding
 
 
 server_ip = '10.0.2.6'  # Replace with the actual server IP address
-server_port = 5933
-gusername = "nick"
+server_port = 5435
+gusername = "n"
+gservice = "n"
+gservicelist = "n"
 
 
 class loginOrCreatePage(tk.Frame):
@@ -25,6 +27,9 @@ class loginOrCreatePage(tk.Frame):
 
 
     def update(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
         tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
         tk.Label(self, text="What Would You Like To Do?").grid(row=1, column=0)
         tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
@@ -53,6 +58,9 @@ class LoginPage(tk.Frame):
         self.password = tk.StringVar()
 
     def update(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
         tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
         tk.Label(self, text="Login to an Existing Account?").grid(row=1, column=0)
         tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
@@ -88,6 +96,9 @@ class LoginPage(tk.Frame):
         responsearr = data.split()
         gusername = username
 
+        self.username = tk.StringVar()
+        self.password = tk.StringVar()
+
         if responsearr[1] == "Succsessful":
             self.controller.show_frame(MenuPage)
         else:
@@ -109,6 +120,9 @@ class CreatePage(tk.Frame):
         self.password = tk.StringVar()
 
     def update(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
         tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
         tk.Label(self, text="Create a New Account?").grid(row=1, column=0)
         tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
@@ -118,7 +132,7 @@ class CreatePage(tk.Frame):
         tk.Entry(self, textvariable=self.password, show="*").grid(row=6, column=0)
 
         tk.Button(self, text="Create Account", command=self.createAccount).grid(row=7, column=0)
-        tk.Button(self, text="Cancel", command=self.quit).grid(row=8, column=1)
+        tk.Button(self, text="Cancel", command=self.quit).grid(row=8, column=0)
 
     def createAccount(self):
         global gusername
@@ -148,6 +162,8 @@ class CreatePage(tk.Frame):
 
         responsearr = data.split()
         gusername = username
+        self.username = tk.StringVar()
+        self.password = tk.StringVar()
 
         if responsearr[1] == "Succsessfully":
             self.controller.show_frame(MenuPage)
@@ -168,6 +184,10 @@ class MenuPage(tk.Frame):
         self.i = 0
 
     def update(self):
+        global gservicelist
+        for widget in self.winfo_children():
+            widget.destroy()
+
         tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
         tk.Label(self, text="What Would You Like To Do?").grid(row=1, column=0)
         tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
@@ -186,6 +206,7 @@ class MenuPage(tk.Frame):
 
         client_socket.close()
 
+        gservicelist = data
         responsearr = data.split()
 
         i = 0
@@ -197,24 +218,26 @@ class MenuPage(tk.Frame):
         tk.Label(self, text=str(i) + ". " + "Add a New Password\n").grid(row=(i+2), column=0)
 
         tk.Label(self, text="Enter #:").grid(row=(i+3), column=0)
-        tk.Entry(self, textvariable=self.numInput).grid(row=(i+3), column=1)
+        tk.Entry(self, textvariable=self.numInput).grid(row=(i+4), column=0)
 
         self.i = i
 
-        tk.Button(self, text="Submit", command=self.submit).grid(row=(i+4), column=0)
+        tk.Button(self, text="Submit", command=self.submit).grid(row=(i+5), column=0)
 
-        tk.Button(self, text="Quit", command=self.quit).grid(row=(i+5), column=0)
+        tk.Button(self, text="Quit", command=self.quit).grid(row=(i+6), column=0)
 
     def submit(self):
+        global gservice
         self.controller.show_frame(loginOrCreatePage)
         selectedOption = self.numInput.get()
         i = self.i
-        print(self.i)
+        self.numInput = tk.StringVar()
 
-        if int(selectedOption) == i:
+        if int(selectedOption) == int(i):
             self.controller.show_frame(AddServicePage)
-        elif int(selectedOption) < i and int(selectedOption) >= 0:
-            #self.controller.show_frame(displayService)
+        elif int(selectedOption) < int(i) and int(selectedOption) >= 0:
+            self.controller.show_frame(DisplayServicePage)
+            gservice = i
             print("Hi")
         else:
             self.controller.show_frame(MenuPage)
@@ -236,8 +259,11 @@ class AddServicePage(tk.Frame):
         self.key = tk.StringVar()
 
     def update(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
         tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
-        tk.Label(self, text="Login to an Existing Account?").grid(row=1, column=0)
+        tk.Label(self, text="Enter Service Information and Key").grid(row=1, column=0)
         tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
         tk.Label(self, text="Service:").grid(row=3, column=0)
         tk.Entry(self, textvariable=self.service).grid(row=4, column=0)
@@ -261,14 +287,6 @@ class AddServicePage(tk.Frame):
             self.controller.show_frame(AddServicePage)
             return
 
-        if len(key) != 16:
-            self.controller.show_frame(AddServicePage)
-            return
-
-        #Clear the page
-        for widget in self.winfo_children():
-            widget.place_forget()
-
         #get the hash of the inputted key to compare it with the saved key hash
         hashObject = hashlib.sha256()
         hashObject.update(key.encode('utf-8'))
@@ -284,7 +302,7 @@ class AddServicePage(tk.Frame):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((server_ip, server_port))
 
-        message = "AS " + service + " " + username + " " + ciphertext.hex() + " " + keyhash + " " + username
+        message = "AS " + service + " " + username + " " + ciphertext.hex() + " " + keyhash + " " + gusername
         client_socket.sendall(message.encode('utf-8'))
 
         data = client_socket.recv(1024).decode('utf-8')
@@ -294,8 +312,118 @@ class AddServicePage(tk.Frame):
 
         client_socket.close()
 
+        self.service = tk.StringVar()
+        self.username = tk.StringVar()
+        self.password = tk.StringVar()
+        self.key = tk.StringVar()
+
+        self.controller.show_frame(ContinuePage)
+
     def quit(self):
         self.controller.quit()
+
+
+
+
+
+class DisplayServicePage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.key = tk.StringVar()
+
+    def update(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
+        tk.Label(self, text="Please Enter Key").grid(row=1, column=0)
+        tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
+        tk.Label(self, text="Key (16 bytes):").grid(row=3, column=0)
+        tk.Entry(self, textvariable=self.key, show="*").grid(row=4, column=0)
+
+        tk.Button(self, text="Submit", command=self.displayService).grid(row=5, column=0)
+        tk.Button(self, text="Cancel", command=self.quit).grid(row=6, column=0)
+
+    def displayService(self):
+        key = self.key.get()
+
+        if len(key) != 16:
+            self.controller.show_frame(AddServicePage)
+            return
+
+        #hash the inputted key
+        hashObject = hashlib.sha256()
+        hashObject.update(key.encode('utf-8'))
+        keyhash = hashObject.hexdigest()
+
+        servicelist = gservicelist.split()
+        service = servicelist[int(gservice) - 1]
+
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((server_ip, server_port))
+
+        message = "DS " + gusername + " " + keyhash + " " + service
+        client_socket.sendall(message.encode('utf-8'))
+
+        data = client_socket.recv(1024).decode('utf-8')
+        while not data:
+            data = client_socket.recv(1024).decode('utf-8')
+        print(f"Received response: {data}")
+
+        client_socket.close()
+
+        responsearr = data.split()
+
+        cipher = AES.new(key.encode(), AES.MODE_CBC, b'\x00' * AES.block_size)
+        dec = cipher.decrypt(bytes.fromhex(responsearr[2]))
+        pplain = Padding.unpad(dec, AES.block_size).decode()
+
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
+        tk.Label(self, text="Key Input Succsessful").grid(row=1, column=0)
+        tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
+        tk.Label(self, text=("Service: " + service)).grid(row=3, column=0)
+        tk.Label(self, text=("Username: " + responsearr[1])).grid(row=4, column=0)
+        tk.Label(self, text=("Password: " + pplain)).grid(row=5, column=0)
+
+        tk.Button(self, text="Login", command=self.continuePrompt).grid(row=6, column=0)
+
+    def continuePrompt(self):
+        self.controller.show_frame(ContinuePage)
+
+    def quit(self):
+        self.controller.quit()
+
+
+
+
+
+
+class ContinuePage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+
+    def update(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
+        tk.Label(self, text="Would You Like To Do?").grid(row=1, column=0)
+        tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
+        tk.Button(self, text="Return To Menu", command=self.continueToMenu).grid(row=3, column=0)
+        tk.Button(self, text="Quit", command=self.quit).grid(row=5, column=0)
+
+    def continueToMenu(self):
+        self.controller.show_frame(MenuPage)
+
+    def quit(self):
+        self.controller.quit()
+
 
 
 
@@ -313,7 +441,7 @@ class Application(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (AddServicePage, LoginPage, CreatePage, MenuPage, loginOrCreatePage):
+        for F in (DisplayServicePage, ContinuePage, AddServicePage, LoginPage, CreatePage, MenuPage, loginOrCreatePage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
