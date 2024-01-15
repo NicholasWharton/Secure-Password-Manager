@@ -1,5 +1,15 @@
 #Secure Password Manager
 
+(CURRENT VERSION)
+
+pmclientGUI2.py: the main driver program for the client. Runs the GUI and handles the interaction between the user and the server.
+
+pmserver.py: is the server-side program that listens for and handles client requests. Securely receiving information from the
+client or sending it. Then storing the information on the server side so it's inaccessible unless the adversary gets to the central
+system.
+
+(FOR THE 1/13/23 ARCHIVE PROGRAM FILES)
+
 pmclient.py: the main driver program for the client. Runs the GUI and handles the interaction between the user and the server.
 
   pmclientservices.py: holds functions that allow the adding of services to a user account and displaying this information.
@@ -22,6 +32,20 @@ associated with the username. This way no man in the middle can get the plain te
 
 The program uses SHA256 Hashes and AES CBC encryption with 128 bit keys
 
+Future Changes to Make:
+
+1. Ask for confirmation password when creating an account or service (also maybe confirm key when input for creating service)
+
+2. Add display service capabilities to pmclientGUI2.py
+
+3. Add page which asks user to either continue with the app or exit to pmclientGUI2.py
+
+
+Changes made on 1/14/24:
+
+1. new client program created named pmclientGUI2.py which completly changes the way that the GUI functions. Instead of deleting the window after every operation. Pages are now constructed and switched between on a single window making the experience more seamless.
+
+2. Added (and reworked) the functionality to pmclientGUI2.py to create user accounts, login to user accounts, interact with the account menu, and add new services. While still maintaining the same functionality with the server which had been established when building the original version of the program.
 
 Changes made on 1/13/24:
 
