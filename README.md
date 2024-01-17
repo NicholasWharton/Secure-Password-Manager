@@ -1,3 +1,4 @@
+<pre>
 #Secure Password Manager
 
 (CURRENT VERSION)
@@ -39,11 +40,26 @@ associated with the username. This way no man in the middle can get the plain te
 
 The program uses SHA256 Hashes and AES CBC encryption with 128 bit keys
 
+
+
+
 Future Changes to Make:
 
-1. Ask for confirmation password when creating an account or service (also maybe confirm key when input for creating service)
+1. Add signatures to provide accountability to messages. 
 
-2. need to add floodserver() to pmclientGUI2.py
+
+
+
+
+Changes made on 1/16/24:
+
+1. Fixed Display Service page to deal with the invalid key input that is 16 bytes. Also fixed the text boxes to reset upon update.
+
+2. Centered the elements on the page horizontally\
+
+3. Added floodserver() functionality to pmclientGUI2.py
+
+4. Added confirmation password when creating an account or service
 
 
 Changes made on 1/15/24:
@@ -53,8 +69,6 @@ Changes made on 1/15/24:
 2. Fixed the updating of pages so they are cleared before they update. While also making it so the page is updated when its switch too rather than just on initialization.
 
 3. Added the displayService() function to pmclientGUI2.py which is now fixed to only compares the generated key hash with the record associated with the choosen service in the menu.
-
-
 
 
 Changes made on 1/14/24:
@@ -77,3 +91,5 @@ Changes made on 1/12/24:
 3. The port number can be input through the first argument or the default value can be used on both the server and client
 
 4. The server interface address can be added as the second argument for the client program
+
+</pre>

@@ -1,7 +1,7 @@
 # Nicholas Wharton
 # Secure Password Manager
 # Main Server Driver Function
-# 1/13/2024
+# 1/16/2024
 
 import socket
 import csv
@@ -23,6 +23,7 @@ def HandleClient (conn, addr):
         responsearr = data.split()
 
         if responsearr[0] == "Discover": #used for client to discover server
+            print("Sent: Alive")
             conn.sendall("Alive".encode('utf-8'))
 
         elif responsearr[0] == "L": #user attempts to login
@@ -36,8 +37,10 @@ def HandleClient (conn, addr):
                         if passhash in row:
                             found = True
             if found == True:
+                print("Sent: Login Succsessful")
                 conn.sendall("Login Succsessful".encode('utf-8'))
             else:
+                print("Sent: Login Failed")
                 conn.sendall("Login Failed".encode('utf-8'))
 
         elif responsearr[0] == "C": #user attempts to create an account
@@ -65,14 +68,15 @@ def HandleClient (conn, addr):
                     pass
 
             if found == False:
+                print("Sent: Account Succsessfully Created")
                 conn.sendall("Account Succsessfully Created".encode('utf-8'))
             else:
+                print("Sent: Account Creation Failed")
                 conn.sendall("Account Creation Failed".encode('utf-8'))
 
         elif responsearr[0] == "M":
             username = responsearr[1]
             serviceString = "S "
-            print("here")
             userfile = username + ".csv"
             with open(userfile, 'r') as file:
                 reader = csv.reader(file)
@@ -89,8 +93,8 @@ def HandleClient (conn, addr):
             uInput = responsearr[2]
             hexct = responsearr[3]
             keyhash = responsearr[4]
-
             username = responsearr[5]
+
             userfile = username + ".csv"
 
             data = [sInput, uInput, hexct, keyhash]
@@ -98,14 +102,14 @@ def HandleClient (conn, addr):
             with open(userfile, 'a') as file:
                 writer = csv.writer(file)
                 writer.writerow(data)
-
-            conn.sendall("Service Added Succsessfully".encode('utf-8'))
+                print("Sent: Service Added Succsessfully")
+                conn.sendall("Service Added Succsessfully".encode('utf-8'))
 
         elif responsearr[0] == "DS":
             username = responsearr[1]
             keyhash = responsearr[2]
+            service = responsearr[3]
 
-            readService = ""
             readUname = ""
             readPass = ""
             userfile = username + ".csv"
@@ -114,14 +118,18 @@ def HandleClient (conn, addr):
                 reader = csv.reader(file)
                 #if the key hash generated is the same as the one saved in the service entry
                 for row in reader:
-                    if keyhash == row[3]:
+                    if service == row[0] and keyhash == row[3]:
                         #decrypt the password and print the service information
-                         readService = row[0]
                          readUname = row[1]
                          readPass = row[2]
                          break
 
-            conn.sendall((readService + " " + readUname + " " + readPass).encode('utf-8'))
+            if readUname == "":
+                print("Sent: Key Invalid")
+                conn.sendall(("Key Invalid").encode('utf-8'))
+            else:
+                print("Sent: Key Valid")
+                conn.sendall((service + " " + readUname + " " + readPass).encode('utf-8'))
 
     conn.close()
 
