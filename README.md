@@ -10,6 +10,11 @@ client or sending it. Then storing the information on the server side so it's in
 system.
 
 
+(Experimental version)
+
+clientTunnel.py: main client driver program to run the GUI and handle the interactions between the user and server.
+
+serverTunnel.py: main client driver program to run the handle the interactions with the user. Though this version connects to the server with a single session.
 
 
 (FOR THE 1/13/23 ARCHIVE PROGRAM FILES)
@@ -42,20 +47,28 @@ The program uses SHA256 Hashes and AES CBC encryption with 128 bit keys
 
 
 
+(Tunnel Version Security)
+
+This version which is being worked on connects the server and client with a single session where all messages are encrypted. This encryption is handled by sharing a symmetric key using RSA public key encryption at the start of each session.
+
 
 Future Changes to Make:
 
-1. Add signatures to provide accountability to messages. 
+1. Add signatures to provide accountability to messages.
+
+2. Add salting to the encryption workflow for passwords before sent and stored.
 
 
 
+Changes made on 2/27/24:
 
+1. Started working on the clientTunnel.py and serverTunnel.py version of the program to use a single session rather than reestablishing the socket connection for every message. Then a symmetric session key can be generated to encrypt all messages being sent between the client and server.
 
 Changes made on 1/16/24:
 
 1. Fixed Display Service page to deal with the invalid key input that is 16 bytes. Also fixed the text boxes to reset upon update.
 
-2. Centered the elements on the page horizontally\
+2. Centered the elements on the page horizontally
 
 3. Added floodserver() functionality to pmclientGUI2.py
 
