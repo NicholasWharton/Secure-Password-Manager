@@ -1,7 +1,7 @@
 # Nicholas Wharton
 # Secure Password Manager
 # Server with single session and message encryption
-# 2/27/2024
+# 2/28/2024
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -17,34 +17,52 @@ import tkinter
 import threading
 from Crypto.Cipher import AES
 from Crypto.Util import Padding
-
+from handleClients import HandleClient
 
 
 #only needs to get client private key so it can share symmetric key securly
 def shareSymmetricKey(conn):
 
     #used to read in the discover message
-    data = conn.recv(1024).decode('utf-8')
-    while not data:
-        data = conn.recv(1024).decode('utf-8')
-    print(f"Received response: {data}")
+    discoverMsg = conn.recv(1024).decode('utf-8')
+    while not discoverMsg:
+        discoverMsg = conn.recv(1024).decode('utf-8')
+    print("Received Inital Response From Client")
 
-    if data == "Discover": #used for client to discover server
+    #make sure the client is attempting to find this service on the server
+    if discoverMsg == "Discover": #used for client to discover server
         print("Sent: Alive")
         conn.sendall("Alive".encode('utf-8'))
+    else:
+        exit()
 
     #now used to recieve the clients public key
-    data = conn.recv(1024).decode('utf-8')
-    while not data:
-        data = conn.recv(1024).decode('utf-8')
-    print(f"Received response: {data}")
+    clientsPublicKey = conn.recv(1024)
+    while not clientsPublicKey:
+        clientsPublicKey = conn.recv(1024)
+    print("Received Clients Public Key")
 
+    cPublicKey = serialization.load_pem_public_key(clientsPublicKey, backend=default_backend())
 
+    #genereate symmetric key
+    symmKey = os.urandom(32)
+    print("Generated Symmetric Key")
 
+    # Encrypt a message using the public key
+    encryptedSymmKey = cPublicKey.encrypt(
+        symmKey,
+        padding.OAEP(
+            mgf = padding.MGF1(algorithm = hashes.SHA256()),
+            algorithm = hashes.SHA256(),
+            label = None
+        )
+    )
 
+    #send client the encrypted symmetric key
+    conn.sendall(encryptedSymmKey)
+    print("Sent Client Encrypted Symmetric Key")
 
-#def handleClient(symmetricKey):
-
+    HandleClient(conn, symmKey)
 
 
 

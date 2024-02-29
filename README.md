@@ -14,7 +14,13 @@ system.
 
 clientTunnel.py: main client driver program to run the GUI and handle the interactions between the user and server.
 
+clientMenu.py: Holds all of the application window frames to be switched between.
+
 serverTunnel.py: main client driver program to run the handle the interactions with the user. Though this version connects to the server with a single session.
+
+handleClients.py: holds the handle client function to process the messages recieved from the client, respond, and manage the stored data.
+
+
 
 
 (FOR THE 1/13/23 ARCHIVE PROGRAM FILES)
@@ -51,12 +57,27 @@ The program uses SHA256 Hashes and AES CBC encryption with 128 bit keys
 
 This version which is being worked on connects the server and client with a single session where all messages are encrypted. This encryption is handled by sharing a symmetric key using RSA public key encryption at the start of each session.
 
+Now each message that is sent is completly encrypted using AES CBC-mode using the symmetric key shared.
+
 
 Future Changes to Make:
 
 1. Add signatures to provide accountability to messages.
 
 2. Add salting to the encryption workflow for passwords before sent and stored.
+
+3. AddService deal with response from server
+
+4. Create a way to identify the user based on the system that they create the account on so you can only access the account if you are useing the physical device that the account was created with.
+
+
+Changes made on 2/28/24:
+
+1. Completed the symmetric key establishment process.
+
+2. Converted the functionality of the upgraded GUI client application and the servers client handler function to work in a single session.
+
+3. Set up all messaging to be AES CBC encypted, though it isnt working.
 
 
 
