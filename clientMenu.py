@@ -78,6 +78,7 @@ class LoginPage(tk.Frame):
     #Once the user submits the login info
     def login(self):
         global gusername
+        #pull values from the text box
         username = self.username.get()
         password = self.password.get()
 
@@ -86,21 +87,25 @@ class LoginPage(tk.Frame):
         hashObject.update(password.encode('utf-8'))
         passhash = hashObject.hexdigest()
 
+        #create the message encrypt and send to the server
         message = "L " + username + " " + passhash
         cipher = AES.new(self.key, AES.MODE_CBC, b'\x00' * AES.block_size)
         paddedPlain = Padding.pad(message.encode(), AES.block_size)
         ciphertext = cipher.encrypt(paddedPlain)
 
         self.clientSocket.sendall(ciphertext)
+        print("Sent Login Request to Server")
 
+        #wait for the server to respond
         data = self.clientSocket.recv(1024)
         while not data:
             data = self.clientSocket.recv(1024)
+        print("Recieved Server Response to Login Request")
 
+        #decrypt message and switch frame based on the response
         cipher = AES.new(self.key, AES.MODE_CBC, b'\x00' * AES.block_size)
         dec = cipher.decrypt(data)
         pplain = Padding.unpad(dec, AES.block_size).decode()
-        print(f"Received response: {pplain}")
 
         responsearr = pplain.split()
         gusername = username
@@ -155,6 +160,7 @@ class CreatePage(tk.Frame):
     #Once the user submits the account info
     def createAccount(self):
         global gusername
+        #get the values from the text boxes
         username = self.username.get()
         password = self.password.get()
         passwordconf = self.passwordconf.get()
@@ -164,6 +170,7 @@ class CreatePage(tk.Frame):
             self.controller.showFrame(loginOrCreatePage)
             return
 
+        #make sure tha tthe confirm password is the same as the password input
         if password != passwordconf:
             self.controller.showFrame(loginOrCreatePage)
             return
@@ -173,21 +180,25 @@ class CreatePage(tk.Frame):
         hashObject.update(password.encode('utf-8'))
         passhash = hashObject.hexdigest()
 
+        #generate the message encrypt it and send it to the server
         message = "C " + username + " " + passhash
         cipher = AES.new(self.key, AES.MODE_CBC, b'\x00' * AES.block_size)
         paddedPlain = Padding.pad(message.encode(), AES.block_size)
         ciphertext = cipher.encrypt(paddedPlain)
 
         self.clientSocket.sendall(ciphertext)
+        print("Sent Create Account Request to the Server")
 
+        #wait for the server response
         data = self.clientSocket.recv(1024)
         while not data:
             data = self.clientSocket.recv(1024)
+        print("Recieved Server Response to the Create Account Request")
 
+        #decrupt and decide what frame to switch to based on the response
         cipher = AES.new(self.key, AES.MODE_CBC, b'\x00' * AES.block_size)
         dec = cipher.decrypt(data)
         pplain = Padding.unpad(dec, AES.block_size).decode()
-        print(f"Received response: {pplain}")
 
         responsearr = pplain.split()
         gusername = username
@@ -224,23 +235,25 @@ class MenuPage(tk.Frame):
         tk.Label(self, text="What Would You Like To Do?").grid(row=1, column=0)
         tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
 
-
+        #generate message to request the services from the server
         message = "M " + gusername
         cipher = AES.new(self.key, AES.MODE_CBC, b'\x00' * AES.block_size)
         paddedPlain = Padding.pad(message.encode(), AES.block_size)
         ciphertext = cipher.encrypt(paddedPlain)
 
         self.clientSocket.sendall(ciphertext)
-        print("Sending: " + message)
+        print("Sending Menu Request Message")
 
+        #wait for the servers response
         data = self.clientSocket.recv(1024)
         while not data:
             data = self.clientSocket.recv(1024)
 
+        #decypt response to get the services related to the logged in account
         cipher = AES.new(self.key, AES.MODE_CBC, b'\x00' * AES.block_size)
         dec = cipher.decrypt(data)
         pplain = Padding.unpad(dec, AES.block_size).decode()
-        print(f"Received response: {pplain}")
+        print("Received Menu Response")
 
         responsearr = pplain.split()
 
@@ -267,7 +280,8 @@ class MenuPage(tk.Frame):
     #Once the user input if they want to display a service or add a new one
     def submit(self):
         global gservice
-        self.controller.showFrame(loginOrCreatePage)
+
+        #self.controller.showFrame(loginOrCreatePage)
         selectedOption = self.numInput.get()
         i = self.i
         self.numInput = tk.StringVar()
@@ -278,7 +292,6 @@ class MenuPage(tk.Frame):
         elif int(selectedOption) < int(i) and int(selectedOption) >= 0:
             self.controller.showFrame(DisplayServicePage)
             gservice = i
-            print("Hi")
         else:
             self.controller.showFrame(MenuPage)
 
@@ -309,7 +322,7 @@ class AddServicePage(tk.Frame):
         self.service = tk.StringVar()
         self.username = tk.StringVar()
         self.password = tk.StringVar()
-        self.key = tk.StringVar()
+        self.passKey = tk.StringVar()
 
         tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
         tk.Label(self, text="Enter Service Information and Key").grid(row=1, column=0)
@@ -321,7 +334,7 @@ class AddServicePage(tk.Frame):
         tk.Label(self, text="Password:").grid(row=7, column=0)
         tk.Entry(self, textvariable=self.password, show="*").grid(row=8, column=0)
         tk.Label(self, text="Key (16 bytes):").grid(row=9, column=0)
-        tk.Entry(self, textvariable=self.key, show="*").grid(row=10, column=0)
+        tk.Entry(self, textvariable=self.passKey, show="*").grid(row=10, column=0)
 
         tk.Button(self, text="Login", command=self.addService).grid(row=11, column=0)
         tk.Button(self, text="Cancel", command=self.quit).grid(row=12, column=0)
@@ -335,7 +348,7 @@ class AddServicePage(tk.Frame):
 
         #if the key isnt 16 bytes or the other fileds are empty
         if len(service) == 0 or len(username) == 0 or len(password) == 0 or len(passKey) != 16:
-            self.controller.showFrame(AddServicePage)
+            self.controller.showFrame(MenuPage)
             return
 
         #get the hash of the inputted key to compare it with the saved key hash
@@ -350,21 +363,22 @@ class AddServicePage(tk.Frame):
 
         #Save the service name, the user name for the service, the encrypted
         #password, and a hash of the key to the users service file.
-
         message = "AS " + service + " " + username + " " + ciphertext.hex() + " " + passKeyHash + " " + gusername
         cipher = AES.new(self.key, AES.MODE_CBC, b'\x00' * AES.block_size)
         paddedPlain = Padding.pad(message.encode(), AES.block_size)
         ciphertext = cipher.encrypt(paddedPlain)
 
         self.clientSocket.sendall(ciphertext)
+        print("Sent Add Service Request to Server")
 
-        data = self.clientSocket.recv(1024).decode('utf-8')
+        #wait for server response
+        data = self.clientSocket.recv(1024)
         while not data:
-            data = self.clientSocket.recv(1024).decode('utf-8')
-        print(f"Received response: {data}")
+            data = self.clientSocket.recv(1024)
 
-        #!!!!!!!!!!!!need to deal with this response!!!!!!!!
+        print("Server Added The Service")
 
+        #ask the user if they want to continue back to the menu or exit
         self.controller.showFrame(ContinuePage)
 
     def quit(self):
@@ -388,12 +402,12 @@ class DisplayServicePage(tk.Frame):
         for widget in self.winfo_children():
             widget.destroy()
 
-        self.key = tk.StringVar()
+        self.passKey = tk.StringVar()
         tk.Label(self, text="-----------------------------------------").grid(row=0, column=0)
         tk.Label(self, text="Please Enter Key").grid(row=1, column=0)
         tk.Label(self, text="-----------------------------------------").grid(row=2, column=0)
         tk.Label(self, text="Key (16 bytes):").grid(row=3, column=0)
-        tk.Entry(self, textvariable=self.key, show="*").grid(row=4, column=0)
+        tk.Entry(self, textvariable=self.passKey, show="*").grid(row=4, column=0)
 
         tk.Button(self, text="Submit", command=self.displayService).grid(row=5, column=0)
         tk.Button(self, text="Cancel", command=self.quit).grid(row=6, column=0)
@@ -401,8 +415,8 @@ class DisplayServicePage(tk.Frame):
     def displayService(self):
         passKey = self.passKey.get()
 
-        if len(key) != 16:
-            self.controller.showFrame(DisplayServicePage)
+        if len(passKey) != 16:
+            self.controller.showFrame(MenuPage)
             return
 
         #hash the inputted key
@@ -410,33 +424,37 @@ class DisplayServicePage(tk.Frame):
         hashObject.update(passKey.encode('utf-8'))
         passKeyHash = hashObject.hexdigest()
 
+        #figure out what service the user selected to see
         servicelist = gservicelist.split()
         service = servicelist[int(gservice) - 1]
 
-
+        #request the selected services stored information from the server
         message = "DS " + gusername + " " + passKeyHash + " " + service
         cipher = AES.new(self.key, AES.MODE_CBC, b'\x00' * AES.block_size)
         paddedPlain = Padding.pad(message.encode(), AES.block_size)
         ciphertext = cipher.encrypt(paddedPlain)
 
         self.clientSocket.sendall(ciphertext)
+        print("Sent Display Service Request to Server")
 
+        #wait for the server response
         data = self.clientSocket.recv(1024)
         while not data:
             data = self.clientSocket.recv(1024)
+        print("Recieved Display Service Response From the Server")
 
+        #decrypt the message
         cipher = AES.new(self.key, AES.MODE_CBC, b'\x00' * AES.block_size)
         dec = cipher.decrypt(data)
         pplain = Padding.unpad(dec, AES.block_size).decode()
-        print(f"Received response: {pplain}")
 
         responsearr = pplain.split()
-
 
         if (responsearr[0] == "Key"): #if the input key is invalid
             self.controller.showFrame(DisplayServicePage)
             return
 
+        #decrypt the encrypted password from the decrypted message
         cipher = AES.new(passKey.encode(), AES.MODE_CBC, b'\x00' * AES.block_size)
         dec = cipher.decrypt(bytes.fromhex(responsearr[2]))
         pplain = Padding.unpad(dec, AES.block_size).decode()
